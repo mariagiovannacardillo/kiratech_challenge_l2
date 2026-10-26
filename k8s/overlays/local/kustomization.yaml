@@ -9,7 +9,7 @@ resources:
 secretGenerator:
   - name: redis-pass
     literals:
-      - password=super-secure-password
+      - password=P@ssw0rd.4321?
 
 
 patches:
@@ -41,7 +41,7 @@ patches:
             targetPort: 8080
             nodePort: 30000
 
-  # 3. Throttling (Risorse) e Readiness Probe per evitare falsi positivi
+  # 3. Throttling (Risorse), Readiness Probe e Liveness Probe per evitare falsi positivi
   - target:
       kind: Deployment
       name: frontend
@@ -68,3 +68,9 @@ patches:
                     port: 8080
                   initialDelaySeconds: 5
                   periodSeconds: 5
+                livenessProbe:
+                  httpGet:
+                    path: /_healthz
+                    port: 8080
+                  initialDelaySeconds: 15
+                  periodSeconds: 10

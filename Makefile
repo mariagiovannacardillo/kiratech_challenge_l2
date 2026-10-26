@@ -18,7 +18,7 @@ deploy:
 	kubectl apply -k k8s/overlays/local
 
 wait-ready:
-	kubectl wait --for=condition=ready pod -l app=frontend -n challenge-l2 --timeout=120s
+	kubectl wait --for=condition=ready pod --all -n challenge-l2 --timeout=120s
 
 verify:
 	kubectl get pods -n challenge-l2
@@ -33,4 +33,4 @@ trigger-incident-2:
 recover:
 	kubectl apply -k k8s/overlays/local
 	kubectl rollout restart deployment/frontend -n challenge-l2
-	kubectl wait --for=condition=ready pod -l app=frontend -n challenge-l2 --timeout=120s
+	kubectl wait --for=condition=ready pod --all -n challenge-l2 --timeout=120s

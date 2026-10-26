@@ -1,0 +1,12 @@
+name: CI Validate Manifests
+on: [push]
+
+jobs:
+  kustomize-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Validate Local Overlay
+        run: kubectl kustomize k8s/overlays/local > /dev/null
