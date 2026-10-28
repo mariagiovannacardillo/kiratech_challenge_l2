@@ -1,12 +1,18 @@
 name: CI Validate Manifests
-on: [push]
+on: [push, pull_request]
 
 jobs:
   kustomize-build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Validate Local Overlay
         run: kubectl kustomize k8s/overlays/local > /dev/null
+
+      - name: Validate Incident 1
+        run: kubectl kustomize k8s/overlays/incident-1 | grep -q "tag-inesistente"
+
+      - name: Validate Incident 2
+        run: kubectl kustomize k8s/overlays/incident-2 | grep -q "productcatalog-rotto"

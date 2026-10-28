@@ -5,13 +5,6 @@ namespace: challenge-l2
 resources:
   - ../../base
 
-# Generazione sicura del Secret
-secretGenerator:
-  - name: redis-pass
-    literals:
-      - password=P@ssw0rd.4321?
-
-
 patches:
   # 1. Esclude il generatore di traffico
   - target:
@@ -40,37 +33,3 @@ patches:
             port: 80
             targetPort: 8080
             nodePort: 30000
-
-  # 3. Throttling (Risorse), Readiness Probe e Liveness Probe per evitare falsi positivi
-  - target:
-      kind: Deployment
-      name: frontend
-    patch: |-
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: frontend
-      spec:
-        template:
-          spec:
-            containers:
-              - name: server
-                resources:
-                  requests:
-                    cpu: 100m
-                    memory: 64Mi
-                  limits:
-                    cpu: 200m
-                    memory: 128Mi
-                readinessProbe:
-                  httpGet:
-                    path: /_healthz
-                    port: 8080
-                  initialDelaySeconds: 5
-                  periodSeconds: 5
-                livenessProbe:
-                  httpGet:
-                    path: /_healthz
-                    port: 8080
-                  initialDelaySeconds: 15
-                  periodSeconds: 10

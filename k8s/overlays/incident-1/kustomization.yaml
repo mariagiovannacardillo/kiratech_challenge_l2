@@ -4,6 +4,5 @@ resources:
   - ../local
 
 images:
-  - name: gcr.io/google-samples/microservices-demo/frontend
-    newName: gcr.io/google-samples/microservices-demo/frontend
-    newTag: tag-sbagliato-per-test
+  - name: us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend
+    newTag: tag-inesistente

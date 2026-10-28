@@ -1,4 +1,4 @@
-.PHONY: doctor cluster-up cluster-down deploy wait-ready verify trigger-incident-1 trigger-incident-2 recover
+.PHONY: doctor cluster-up cluster-down deploy wait-ready smoke-test verify trigger-incident-1 trigger-incident-2 recover demo-scale
 
 doctor:
 	@echo "=== Controllo prerequisiti di sistema ==="
@@ -20,6 +20,9 @@ deploy:
 wait-ready:
 	kubectl wait --for=condition=ready pod --all -n challenge-l2 --timeout=120s
 
+smoke-test:
+	curl -fsS http://localhost:30000/ | grep -q "Hot Products" && echo "Smoke test superato" || echo "Smoke test fallito"
+
 verify:
 	kubectl get pods -n challenge-l2
 	kubectl get svc frontend-external -n challenge-l2
@@ -34,3 +37,7 @@ recover:
 	kubectl apply -k k8s/overlays/local
 	kubectl rollout restart deployment/frontend -n challenge-l2
 	kubectl wait --for=condition=ready pod --all -n challenge-l2 --timeout=120s
+
+demo-scale:
+	kubectl scale deployment frontend --replicas=2 -n challenge-l2
+	kubectl get pods -l app=frontend -n challenge-l2
