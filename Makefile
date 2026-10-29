@@ -18,7 +18,7 @@ deploy:
 	kubectl apply -k k8s/overlays/local
 
 wait-ready:
-	kubectl wait --for=condition=ready pod --all -n challenge-l2 --timeout=120s
+	kubectl wait --for=condition=ready pod --all -n challenge-l2 --timeout=300s
 
 smoke-test:
 	curl -fsS http://localhost:30000/ | grep -q "Hot Products" && echo "Smoke test superato" || echo "Smoke test fallito"
@@ -36,7 +36,7 @@ trigger-incident-2:
 recover:
 	kubectl apply -k k8s/overlays/local
 	kubectl rollout restart deployment/frontend -n challenge-l2
-	kubectl wait --for=condition=ready pod --all -n challenge-l2 --timeout=120s
+	kubectl wait --for=condition=ready pod --all -n challenge-l2 --timeout=300s
 
 demo-scale:
 	kubectl scale deployment frontend --replicas=2 -n challenge-l2
