@@ -4,6 +4,12 @@ namespace: challenge-l2
 
 resources:
   - ../../base
+  - namespace.yaml
+
+configMapGenerator:
+  - name: frontend-config
+    literals:
+      - FRONTEND_MESSAGE="Ambiente di test locale - challenge L2"
 
 patches:
   # 1. Esclude il generatore di traffico
@@ -33,3 +39,21 @@ patches:
             port: 80
             targetPort: 8080
             nodePort: 30000
+
+  # 3. Inietta il banner nel frontend leggendo il ConfigMap
+  - target:
+      kind: Deployment
+      name: frontend
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: frontend
+      spec:
+        template:
+          spec:
+            containers:
+              - name: server
+                envFrom:
+                  - configMapRef:
+                      name: frontend-config
