@@ -9,7 +9,7 @@ resources:
 configMapGenerator:
   - name: frontend-config
     literals:
-      - FRONTEND_MESSAGE="Ambiente di test locale - challenge L2"
+      - FRONTEND_MESSAGE=
 
 patches:
   # 1. Esclude il generatore di traffico
@@ -40,7 +40,7 @@ patches:
             targetPort: 8080
             nodePort: 30000
 
-  # 3. Inietta il banner nel frontend leggendo il ConfigMap
+  # 3. Il frontend legge FRONTEND_MESSAGE dal ConfigMap (valore vuoto = nessun banner)
   - target:
       kind: Deployment
       name: frontend
@@ -57,3 +57,14 @@ patches:
                 envFrom:
                   - configMapRef:
                       name: frontend-config
+
+  # 4. Rimuove anche il ServiceAccount del loadgenerator (altrimenti resta orfano)
+  - target:
+      kind: ServiceAccount
+      name: loadgenerator
+    patch: |-
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: loadgenerator
+      $patch: delete
