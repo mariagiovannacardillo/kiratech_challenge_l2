@@ -37,7 +37,7 @@ wait-ready:
 	$(KC) wait --for=condition=available deployment --all -n $(NS) --timeout=300s
 
 smoke-test:
-	curl -fsS http://localhost:30000/ | grep -q "Hot Products" && echo "Smoke test superato" || { echo "Smoke test fallito"; exit 1; }
+	curl -fsS http://localhost:30000/ | grep "Hot Products" > /dev/null && echo "Smoke test superato" || { echo "Smoke test fallito"; exit 1; }
 
 verify:
 	$(KC) get deployments,pods -n $(NS)
