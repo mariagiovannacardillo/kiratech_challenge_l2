@@ -18,7 +18,7 @@ doctor:
 	@echo "kubectl: $$(kubectl version --client 2>/dev/null | head -n 1)"
 	@echo "CPU    : $$(nproc) core (consigliati: almeno 4)"
 	@echo "RAM    : $$(free -m | awk '/^Mem:/ {print $$2}') MiB (consigliati: almeno 8000)"
-	@echo "Tutti i prerequisiti sono soddisfatti."
+	@echo "Diagnostica completata: tool di base operativi. Verificare visivamente che l'hardware rilevato rispetti i valori consigliati."
 
 cluster-up:
 	kind create cluster --name $(CLUSTER_NAME) --config kind-config.yaml

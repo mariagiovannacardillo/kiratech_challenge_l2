@@ -1,0 +1,116 @@
+### DATA: 2026-10-31T10:20:32+00:00   CONTESTO: kind-l2-challenge   NAMESPACE: challenge-l2
+
+### DEPLOYMENT E POD
+NAME                                    READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                                                                                           SELECTOR
+deployment.apps/adservice               1/1     1            1           78m   server       us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/adservice:v0.10.7               app=adservice
+deployment.apps/cartservice             1/1     1            1           78m   server       us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/cartservice:v0.10.7             app=cartservice
+deployment.apps/checkoutservice         1/1     1            1           78m   server       us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/checkoutservice:v0.10.7         app=checkoutservice
+deployment.apps/currencyservice         1/1     1            1           78m   server       us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/currencyservice:v0.10.7         app=currencyservice
+deployment.apps/emailservice            1/1     1            1           78m   server       us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/emailservice:v0.10.7            app=emailservice
+deployment.apps/frontend                1/1     1            1           78m   server       us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend:tag-inesistente        app=frontend
+deployment.apps/paymentservice          1/1     1            1           78m   server       us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/paymentservice:v0.10.7          app=paymentservice
+deployment.apps/productcatalogservice   1/1     1            1           78m   server       us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/productcatalogservice:v0.10.7   app=productcatalogservice
+deployment.apps/recommendationservice   1/1     1            1           78m   server       us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/recommendationservice:v0.10.7   app=recommendationservice
+deployment.apps/redis-cart              1/1     1            1           78m   redis        redis:alpine                                                                                     app=redis-cart
+deployment.apps/shippingservice         1/1     1            1           78m   server       us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/shippingservice:v0.10.7         app=shippingservice
+
+NAME                                         READY   STATUS             RESTARTS      AGE   IP            NODE                         NOMINATED NODE   READINESS GATES
+pod/adservice-9745b7dfb-2l9rk                1/1     Running            0             78m   10.244.0.6    l2-challenge-control-plane   <none>           <none>
+pod/cartservice-6dd594447-9f9w9              1/1     Running            0             78m   10.244.0.5    l2-challenge-control-plane   <none>           <none>
+pod/checkoutservice-775f8bf878-fpz82         1/1     Running            0             78m   10.244.0.7    l2-challenge-control-plane   <none>           <none>
+pod/currencyservice-5dc84bf7d-9c47w          1/1     Running            0             78m   10.244.0.8    l2-challenge-control-plane   <none>           <none>
+pod/emailservice-87865b54d-lcfnq             1/1     Running            7 (72m ago)   78m   10.244.0.9    l2-challenge-control-plane   <none>           <none>
+pod/frontend-5d5bb549b-b7km5                 1/1     Running            0             78m   10.244.0.10   l2-challenge-control-plane   <none>           <none>
+pod/frontend-5fd57fbbb-wjkt5                 0/1     ImagePullBackOff   0             25s   10.244.0.16   l2-challenge-control-plane   <none>           <none>
+pod/paymentservice-d45f6dcf6-b8t7z           1/1     Running            0             78m   10.244.0.11   l2-challenge-control-plane   <none>           <none>
+pod/productcatalogservice-68847998d4-k9r84   1/1     Running            0             78m   10.244.0.12   l2-challenge-control-plane   <none>           <none>
+pod/recommendationservice-5b4d9cd76-j7hdl    1/1     Running            8 (72m ago)   78m   10.244.0.13   l2-challenge-control-plane   <none>           <none>
+pod/redis-cart-558f8d8d44-xpv87              1/1     Running            0             78m   10.244.0.14   l2-challenge-control-plane   <none>           <none>
+pod/shippingservice-6545f454d4-vtt52         1/1     Running            0             78m   10.244.0.15   l2-challenge-control-plane   <none>           <none>
+
+### SERVICE ED ENDPOINTSLICE
+NAME                            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+service/adservice               ClusterIP   10.96.80.228    <none>        9555/TCP       78m
+service/cartservice             ClusterIP   10.96.10.243    <none>        7070/TCP       78m
+service/checkoutservice         ClusterIP   10.96.207.195   <none>        5050/TCP       78m
+service/currencyservice         ClusterIP   10.96.75.110    <none>        7000/TCP       78m
+service/emailservice            ClusterIP   10.96.54.131    <none>        5000/TCP       78m
+service/frontend                ClusterIP   10.96.91.58     <none>        80/TCP         78m
+service/frontend-external       NodePort    10.96.184.112   <none>        80:30000/TCP   78m
+service/paymentservice          ClusterIP   10.96.69.216    <none>        50051/TCP      78m
+service/productcatalogservice   ClusterIP   10.96.57.63     <none>        3550/TCP       78m
+service/recommendationservice   ClusterIP   10.96.26.4      <none>        8080/TCP       78m
+service/redis-cart              ClusterIP   10.96.6.94      <none>        6379/TCP       78m
+service/shippingservice         ClusterIP   10.96.252.183   <none>        50051/TCP      78m
+
+NAME                                                         ADDRESSTYPE   PORTS   ENDPOINTS                 AGE
+endpointslice.discovery.k8s.io/adservice-cg2z9               IPv4          9555    10.244.0.6                78m
+endpointslice.discovery.k8s.io/cartservice-c96b2             IPv4          7070    10.244.0.5                78m
+endpointslice.discovery.k8s.io/checkoutservice-ss5sn         IPv4          5050    10.244.0.7                78m
+endpointslice.discovery.k8s.io/currencyservice-4jdbg         IPv4          7000    10.244.0.8                78m
+endpointslice.discovery.k8s.io/emailservice-x5b79            IPv4          8080    10.244.0.9                78m
+endpointslice.discovery.k8s.io/frontend-external-jp8p4       IPv4          8080    10.244.0.10,10.244.0.16   78m
+endpointslice.discovery.k8s.io/frontend-t524k                IPv4          8080    10.244.0.10,10.244.0.16   78m
+endpointslice.discovery.k8s.io/paymentservice-k9kr6          IPv4          50051   10.244.0.11               78m
+endpointslice.discovery.k8s.io/productcatalogservice-6qgpf   IPv4          3550    10.244.0.12               78m
+endpointslice.discovery.k8s.io/recommendationservice-pdnfn   IPv4          8080    10.244.0.13               78m
+endpointslice.discovery.k8s.io/redis-cart-2gspl              IPv4          6379    10.244.0.14               78m
+endpointslice.discovery.k8s.io/shippingservice-gx7zj         IPv4          50051   10.244.0.15               78m
+
+### ULTIMI EVENTI
+76m         Warning   Unhealthy                      pod/redis-cart-558f8d8d44-xpv87               Readiness probe failed: dial tcp 10.244.0.14:6379: connect: connection refused
+76m         Normal    Created                        pod/recommendationservice-5b4d9cd76-j7hdl     Created container server
+76m         Normal    Started                        pod/recommendationservice-5b4d9cd76-j7hdl     Started container server
+76m         Normal    Pulled                         pod/recommendationservice-5b4d9cd76-j7hdl     Container image "us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/recommendationservice:v0.10.7" already present on machine
+76m         Normal    Killing                        pod/emailservice-87865b54d-lcfnq              Container server failed liveness probe, will be restarted
+76m         Warning   Unhealthy                      pod/emailservice-87865b54d-lcfnq              Readiness probe failed: timeout: failed to connect service "10.244.0.9:8080" within 1s: context deadline exceeded
+76m         Warning   Unhealthy                      pod/emailservice-87865b54d-lcfnq              Liveness probe failed: timeout: failed to connect service "10.244.0.9:8080" within 1s: context deadline exceeded
+76m         Warning   Unhealthy                      pod/recommendationservice-5b4d9cd76-j7hdl     Readiness probe failed: timeout: failed to connect service "10.244.0.13:8080" within 1s: context deadline exceeded
+76m         Warning   Unhealthy                      pod/recommendationservice-5b4d9cd76-j7hdl     Liveness probe failed: timeout: failed to connect service "10.244.0.13:8080" within 1s: context deadline exceeded
+73m         Normal    Started                        pod/emailservice-87865b54d-lcfnq              Started container server
+73m         Warning   BackOff                        pod/recommendationservice-5b4d9cd76-j7hdl     Back-off restarting failed container server in pod recommendationservice-5b4d9cd76-j7hdl_challenge-l2(9618d70c-dee3-4dbe-80a7-0c1ccae57464)
+26s         Normal    ScalingReplicaSet              deployment/frontend                           Scaled up replica set frontend-5fd57fbbb to 1
+26s         Warning   FailedCreate                   replicaset/frontend-5fd57fbbb                 Error creating: Unauthorized
+26s         Normal    Scheduled                      pod/frontend-5fd57fbbb-wjkt5                  Successfully assigned challenge-l2/frontend-5fd57fbbb-wjkt5 to l2-challenge-control-plane
+26s         Normal    SuccessfulCreate               replicaset/frontend-5fd57fbbb                 Created pod: frontend-5fd57fbbb-wjkt5
+26s         Warning   ReplicaSetCreateError          deployment/frontend                           Failed to create new replica set "frontend-5fd57fbbb": Unauthorized
+23s         Warning   FailedToUpdateEndpointSlices   service/frontend                              Error updating Endpoint Slices for Service challenge-l2/frontend: failed to update frontend-t524k EndpointSlice for Service challenge-l2/frontend: Unauthorized
+23s         Warning   FailedToUpdateEndpoint         endpoints/frontend                            Failed to update endpoint challenge-l2/frontend: Unauthorized
+23s         Warning   FailedToUpdateEndpointSlices   service/frontend-external                     Error updating Endpoint Slices for Service challenge-l2/frontend-external: failed to update frontend-external-jp8p4 EndpointSlice for Service challenge-l2/frontend-external: Unauthorized
+23s         Warning   FailedToUpdateEndpoint         endpoints/frontend-external                   Failed to update endpoint challenge-l2/frontend-external: Unauthorized
+23s         Warning   Failed                         pod/frontend-5fd57fbbb-wjkt5                  Error: ImagePullBackOff
+23s         Normal    BackOff                        pod/frontend-5fd57fbbb-wjkt5                  Back-off pulling image "us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend:tag-inesistente"
+11s         Normal    Pulling                        pod/frontend-5fd57fbbb-wjkt5                  Pulling image "us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend:tag-inesistente"
+10s         Warning   Failed                         pod/frontend-5fd57fbbb-wjkt5                  Failed to pull image "us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend:tag-inesistente": rpc error: code = NotFound desc = failed to pull and unpack image "us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend:tag-inesistente": failed to resolve reference "us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend:tag-inesistente": us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend:tag-inesistente: not found
+10s         Warning   Failed                         pod/frontend-5fd57fbbb-wjkt5                  Error: ErrImagePull
+
+### POD NON PRONTI (describe)
+--- frontend-5fd57fbbb-wjkt5
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-jnchg:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                From               Message
+  ----     ------     ----               ----               -------
+  Normal   Scheduled  26s                default-scheduler  Successfully assigned challenge-l2/frontend-5fd57fbbb-wjkt5 to l2-challenge-control-plane
+  Normal   BackOff    23s                kubelet            spec.containers{server}: Back-off pulling image "us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend:tag-inesistente"
+  Warning  Failed     23s                kubelet            spec.containers{server}: Error: ImagePullBackOff
+  Normal   Pulling    11s (x2 over 25s)  kubelet            spec.containers{server}: Pulling image "us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend:tag-inesistente"
+  Warning  Failed     10s (x2 over 24s)  kubelet            spec.containers{server}: Failed to pull image "us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend:tag-inesistente": rpc error: code = NotFound desc = failed to pull and unpack image "us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend:tag-inesistente": failed to resolve reference "us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend:tag-inesistente": us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/frontend:tag-inesistente: not found
+  Warning  Failed     10s (x2 over 24s)  kubelet            spec.containers{server}: Error: ErrImagePull
+
+### LOG FRONTEND (ultime 30 righe per Pod)
+Error from server (BadRequest): container "server" in pod "frontend-5fd57fbbb-wjkt5" is waiting to start: trying and failing to pull image
