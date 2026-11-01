@@ -35,7 +35,7 @@ Ambiente locale riproducibile e laboratorio di troubleshooting L2: deploy di Onl
 
 Schema, tabella dei componenti e spiegazione del Dockerfile: **[docs/architecture.md](docs/architecture.md)**.
 
-In breve: il browser raggiunge `http://localhost:30000` (tramite modifica file hosts locale `http://onlineboutique.local:30000`) → porta mappata da kind sul nodo → Service `frontend-external` (NodePort) → `frontend` → servizi gRPC interni (`ClusterIP`) → `redis-cart` per il carrello.
+In breve: il browser raggiunge `http://localhost:30000` → porta mappata da kind sul nodo → Service `frontend-external` (NodePort) → `frontend` → servizi gRPC interni (`ClusterIP`) → `redis-cart` per il carrello.
 
 ## 3. Prerequisiti e ambiente di test
 
@@ -48,7 +48,7 @@ In breve: il browser raggiunge `http://localhost:30000` (tramite modifica file h
 | Immagine del nodo kind | `kindest/node:v1.31.0` (Kubernetes v1.31.0, fissata in `kind-config.yaml`) |
 | kubectl | v1.37.1 |
 
-Il comando `make doctor` verifica i prerequisiti, ovvere le dipendenze e la presenza degli strumenti, e stampa versioni e risorse hardware; il confronto con i valori consigliati (4 CPU, circa 8 GB di RAM) va fatto leggendo l'output.
+Il comando `make doctor` verifica i prerequisiti, ovvero le dipendenze e la presenza degli strumenti, e stampa versioni e risorse hardware; il confronto con i valori consigliati (4 CPU, circa 8 GB di RAM) va fatto leggendo l'output.
 
 Note sull'ambiente, emerse durante le prove:
 
@@ -61,7 +61,7 @@ Note sull'ambiente, emerse durante le prove:
 ## 4. Installazione
 
 ```bash
-git clone [https://github.com/mariagiovannacardillo/kiratech_challenge_l2.git](https://github.com/mariagiovannacardillo/kiratech_challenge_l2.git)
+git clone https://github.com/mariagiovannacardillo/kiratech_challenge_l2.git
 cd kiratech_challenge_l2
 
 make doctor        # controlla prerequisiti
@@ -204,7 +204,7 @@ Gli output veri raccolti durante le prove sono in `docs/evidence/demo-transcript
 
 ## 12. Limiti noti
 
-- **Riavvii al primo avvio:** `emailservice` e `recommendationservice` si riavviano alcune volte nei primi minuti per probe gRPC con timeout di 1 s; poi si stabilizzano. `make wait-ready` può risultare soddisfatto prima che tutti i Pod siano stabili.
+- **Riavvii al primo avvio (non sempre):** in una mia esecuzione `emailservice` e `recommendationservice` si sono riavviati 7 e 8 volte nei primi minuti (probe gRPC con timeout di 1 s) e poi si sono stabilizzati; in un'altra esecuzione non ci sono stati riavvii (`docs/evidence/demo-transcript.txt`). `make wait-ready` può risultare soddisfatto prima che tutti i Pod siano stabili.
 - **Ambiente:** problema DNS IPv6 di Docker nella mia VM (risolto con `daemon.json`, vedi §3); kubectl v1.37.1 contro cluster v1.31.0, fuori dallo scarto di versione supportato; kind in versione non di release.
 - **Archiviazione Volatile:** `redis-cart` utilizza un volume `emptyDir`. In caso di riavvio del pod, i carrelli attivi degli utenti andranno persi (nessuna persistenza tramite hostPath o PersistentVolumes).
 - **Redis:** immagine `redis:alpine` con tag mobile (non fissato a una versione) e senza autenticazione.
@@ -223,7 +223,7 @@ Gli output veri raccolti durante le prove sono in `docs/evidence/demo-transcript
 |---|---|
 | Repository configurazioni, script, Makefile | Questo repository (root) |
 | Manifest / Kustomize overlays | `k8s/base/`, `k8s/overlays/` |
-| Immagini e Dockerfile (spiegazione) | `docs/architecture.md`, sezione 4 |
+| Immagini e Dockerfile (spiegazione) | `docs/architecture.md`, sezione 5 |
 | Runbook operativi L2 con due scenari, correzione, escalation | `docs/runbooks/` |
 | Schema architetturale e flussi | `docs/architecture.md` |
 | Valutazione concettuale Krateo | `docs/krateo.md` |

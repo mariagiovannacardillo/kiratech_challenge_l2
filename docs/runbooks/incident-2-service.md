@@ -27,8 +27,8 @@ make smoke-test
 - **Sintomo osservato:** Nessun allarme dallo stato dei Pod. Tutti i container (incluso il `productcatalogservice`) restano rigidamente `Running 1/1`. 
   - *Motivazione tecnica:* Le probe del catalogo sono gRPC e il demone `kubelet` le esegue direttamente sull'IP del Pod, ignorando i fallimenti di instradamento di rete a livello di Service. (Le probe HTTP `/_healthz` sono invece esclusive del frontend).
 - **Impatto sull'utente (Degradazione Silenziosa e Guasto a Cascata):** 
-  - La route base non collassa: `curl -I localhost:30000` restituisce `HTTP/1.1 200 OK`. Il frontend gestisce l'assenza del catalogo senza andare in crash totale.
-  - L'output di controllo `make smoke-test` continua a passare, poiché cerca la stringa "Hot Products" nella home. Questo è un limite intrinseco del test, non del cluster.
+  - La route base non collassa: `curl -I localhost:30000` restituisce `HTTP/1.1 200 OK`. La home continua a rispondere (vedi la nota di ipotesi nel §4).
+  - `make smoke-test` controlla solo che la home contenga "Hot Products": non è in grado di rilevare questo incidente. È un limite del test, non del cluster.
   - **Effetto a cascata:** Il blocco critico (Incidente P1) esplode al momento dell'acquisto: navigando verso `/cart/checkout`, la transazione fallisce a cascata con **HTTP Status: 500 Internal Server Error** (Stack: `rpc error: code = Internal desc = failed to prepare order: failed to get product`). 
 
 ## 3. Evidenze raccolte (Output da make evidence e CLI)
@@ -47,7 +47,7 @@ make smoke-test
 |---|---|---|
 | H1: Il Pod `productcatalogservice` è in crash loop o Out of Memory. | Analisi dei restart e dei log tramite `k get pods` e `k logs`. | Esclusa (Pod in stato `Ready 1/1`, 0 restart). |
 | H2: Disconnessione a livello di Service (Selector errato). | Confronto tra il Selector K8s del Service e le Label reali del Pod; verifica degli endpoint tramite `k get endpointslices`. | **Confermata** (EndpointSlice `<unset>`). |
-| H3: `targetPort` del Service sbagliata. | Controllo corrispondenza `targetPort` (3550). | Esclusa (Senza endpoint, la porta non viene nemmeno testata). |
+| H3: `targetPort` del Service sbagliata. | Controllo corrispondenza `targetPort` (3550). | Esclusa (l'overlay modifica solo il selector; `targetPort` resta 3550). |
 | H4: Problema DNS (CoreDNS). | Verifica eventi cluster e raggiungibilità altri servizi. | Esclusa |
 
 **Causa confermata:** Disallineamento critico tra il Selettore specificato nel Service e la Label appesa al Pod. Il traffico inter-pod verso la route gRPC `productcatalog` si perde nel vuoto, provocando un collasso a cascata del `checkoutservice` al momento dell'acquisto.
@@ -61,7 +61,7 @@ k patch svc productcatalogservice -p '{"spec":{"selector":{"app":"productcatalog
 ```
 *Nota operativa:* Ripristina istantaneamente l'instradamento di rete, ma crea un disallineamento (drift) temporaneo tra lo stato del cluster e il repository Git.
 
-**Opzione B: Dichiarativa / GitOps (Consigliata e adottata)**
+**Opzione B: Dichiarativa (consigliata e adottata)**
 ```bash
 make recover
 ```

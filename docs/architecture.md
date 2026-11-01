@@ -9,7 +9,7 @@ Il diagramma riporta le dipendenze lette dalle variabili `*_ADDR` dei manifest e
 
 ```mermaid
 flowchart LR
-    U["Browser sull'host<br/>[http://onlineboutique.local:30000](http://onlineboutique.local:30000)"] -->|"kind: hostPort 30000 -> NodePort 30000"| FEX["Service frontend-external<br/>NodePort, porta 80"]
+    U["Browser<br/>http://localhost:30000"] -->|"kind: hostPort 30000 -> NodePort 30000"| FEX["Service frontend-external<br/>NodePort, porta 80"]
     FEX --> FE["frontend<br/>(Go, container :8080)"]
     FE --> PC["productcatalogservice :3550"]
     FE --> CUR["currencyservice :7000"]
@@ -52,7 +52,7 @@ Note verificate sui manifest:
 ## 3. Risorse Kubernetes create
 
 - **Namespace:** `challenge-l2` (dichiarato in `k8s/overlays/local/namespace.yaml`).
-- **Workloads:** 11 Deployment microservizi + 11 ServiceAccount segregati.
+- **Workloads:** 11 Deployment (10 microservizi + `redis-cart`) e 10 ServiceAccount (`redis-cart` non ne ha uno dedicato).
 - **Service:** 12 in totale: 11 di tipo `ClusterIP` per la comunicazione interna tra servizi e 1 di tipo `NodePort` (`frontend-external`, porta 30000) per l'accesso dal browser host.
 - **ConfigMap:** 1 ConfigMap generato dinamicamente (`frontend-config`, con suffisso hash per innescare i rollout) che fornisce `FRONTEND_MESSAGE` al frontend.
 - **Secret:** Nessuno. L'applicazione non richiede credenziali, evitandone l'esposizione in chiaro.
@@ -61,7 +61,7 @@ Note verificate sui manifest:
 
 ## 4. L'approccio dichiarativo con Kustomize
 
-Il file `k8s/base/boutique.yaml` funge da *Single Source of Truth* immutabile. Quando si esegue `kubectl apply -k`, Kustomize computa il diff a runtime, unendo base e patch dell'overlay prima dell'applicazione. 
+Il file `k8s/base/boutique.yaml` funge da *Single Source of Truth* immutabile. Quando si esegue `kubectl apply -k`, Kustomize genera i manifest finali unendo base e patch dell'overlay; poi `kubectl apply` li confronta con lo stato del cluster e applica le differenze. 
 *Nota architetturale:* Questa configurazione rende le modifiche ripetibili e versionate. Tuttavia, non è "GitOps" in senso stretto, poiché manca un agente a ciclo continuo (come Argo CD o Flux) che riconcili il cluster in automatico; il push dei manifest è demandato all'operatore tramite comando `make`.
 
 | Overlay | Scopo e Modifiche applicate alla Base |
@@ -69,7 +69,7 @@ Il file `k8s/base/boutique.yaml` funge da *Single Source of Truth* immutabile. Q
 | `local` | Namespace target, NodePort 30000, rimozione del loadgenerator, ConfigMap `frontend-config` (banner vuoto). |
 | `demo-reconfig` | Inietta il banner testuale nel ConfigMap (l'hash cambia → nuovo rollout automatico del frontend). |
 | `incident-1` | Patch: altera il tag immagine del frontend in `tag-inesistente` (`ImagePullBackOff`). |
-| `incident-2` | Patch: disallinea il selector del Service `productcatalogservice` (`EndpointSlice <none>`). |
+| `incident-2` | Patch: disallinea il selector del Service `productcatalogservice` (EndpointSlice `<unset>`). |
 
 ## 5. Il Dockerfile del frontend
 

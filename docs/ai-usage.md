@@ -13,7 +13,7 @@ Il progetto ha impiegato assistenti AI come strumenti di confronto, analisi diag
 
 - **Divieto di Dati Sensibili:** Nessun indirizzo IP reale, password di laboratorio o credenziale è stata immessa nei prompt.
 - **Comprensione Pre-Esecuzione:** Non ho mai eseguito comandi generati dall'IA senza prima averne compreso la logica e gli effetti.
-- **Validazione Empirica (Zero-Trust):** La diagnosi fornita dall'IA è stata accettata solo se matematicamente confermabile dai log (`kubectl describe`, `logs`) della mia VM locale. Ogni frammento YAML o Kustomize è stato ispezionato visivamente o tramite `kustomize build` (`kubectl kustomize`) prima dell'applicazione.
+- **Validazione Empirica (Zero-Trust):** La diagnosi fornita dall'IA è stata accettata solo se confermabile dai log (`kubectl describe`, `logs`) della mia VM locale. Ogni frammento YAML o Kustomize è stato ispezionato visivamente o tramite `kustomize build` (`kubectl kustomize`) prima dell'applicazione.
 
 ## 3. Casi Pratici e Correzioni Manuali all'IA
 
@@ -25,7 +25,7 @@ Il progetto ha impiegato assistenti AI come strumenti di confronto, analisi diag
 
 ### Caso 2: Risoluzione bug DNS IPv6 su Kind/VMware
 - **Problema:** Durante un deploy, i container upstream fallivano improvvisamente il download restando in `ErrImagePull`.
-- **Diagnosi IA:** Richiedendo l'analisi della riga di errore `lookup ... on [fd33:...]:53: i/o timeout` generata da `make evidence`, Gemini ha spiegato che il resolver DNS configurato era un indirizzo IPv6 non raggiungibile. Ha correlato questo log a un bug noto di Docker su Linux VM.
+- **Diagnosi IA:** Richiedendo l'analisi della riga di errore `lookup ... on [fd33:...]:53: i/o timeout` generata da `make evidence`, Gemini ha spiegato che il resolver DNS configurato era un indirizzo IPv6 non raggiungibile. Ha ricondotto l'errore a un problema di DNS della mia VM, non a un difetto dell'applicazione.
 - **Azione:** Ho impostato manualmente `{"dns": ["8.8.8.8", "1.1.1.1"]}` in `/etc/docker/daemon.json` e riavviato il daemon, ripristinando l'infrastruttura definitivamente. L'IA mi ha risparmiato ore di debug di rete.
 
 ### Caso 3: Fix per "Broken Pipe" di curl nel Makefile
@@ -41,7 +41,7 @@ Il progetto ha impiegato assistenti AI come strumenti di confronto, analisi diag
 
 | Contenuto | Stato di Validazione |
 |---|---|
-| Deploy, Incidenti, Ripristino (GitOps), Rimozione | Eseguiti rigorosamente sul mio cluster; output in `docs/evidence/` |
+| Deploy, Incidenti, Ripristino (dichiarativo), Rimozione | Eseguiti rigorosamente sul mio cluster; output in `docs/evidence/` |
 | Esito applicativo dell'Incidente 2 | Osservato empiricamente tramite `curl` (home HTTP 200, checkout HTTP 500) |
 | Perché la home regge nell'Incidente 2 | Ipotesi teorica (Connection Pooling), non verificata (vedi Caso 1) |
 | Causa dei riavvii di `emailservice` al primo avvio | Coerente con gli eventi (probe stringente timeout 1s), ma non verificata con ulteriori test isolati |
