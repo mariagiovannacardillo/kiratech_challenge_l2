@@ -1,0 +1,461 @@
+AVVIO:
+make doctor 
+=== Controllo prerequisiti di sistema ===
+docker : Docker version 20.10.24+dfsg1, build 297e128
+kind   : kind v0.34.0-alpha+2b29bebb68be83 go1.27.3 linux/amd64
+kubectl: Client Version: v1.37.1
+CPU    : 4 core (consigliati: almeno 4)
+RAM    : 7906 MiB (consigliati: almeno 8000)
+Diagnostica completata: tool di base operativi. Verificare visivamente che l'hardware rilevato rispetti i valori consigliati.
+
+make cluster-up 
+kind create cluster --name l2-challenge --config kind-config.yaml
+Creating cluster "l2-challenge" ...
+ ✓ Ensuring node image (kindest/node:v1.31.0) 🖼️
+ ✓ Preparing nodes 📦  
+ ✓ Writing configuration 📜 
+ ✓ Starting control-plane 🕹️ 
+ ✓ Installing CNI 🔌 
+ ✓ Installing StorageClass 💾 
+Set kubectl context to "kind-l2-challenge"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-l2-challenge
+
+Thanks for using kind! 😊
+kubectl --context kind-l2-challenge get nodes
+NAME                         STATUS     ROLES           AGE   VERSION
+l2-challenge-control-plane   NotReady   control-plane   7s    v1.31.0
+
+make deploy 
+kubectl --context kind-l2-challenge apply -k k8s/overlays/local
+namespace/challenge-l2 created
+serviceaccount/adservice created
+serviceaccount/cartservice created
+serviceaccount/checkoutservice created
+serviceaccount/currencyservice created
+serviceaccount/emailservice created
+serviceaccount/frontend created
+serviceaccount/paymentservice created
+serviceaccount/productcatalogservice created
+serviceaccount/recommendationservice created
+serviceaccount/shippingservice created
+configmap/frontend-config-mh6288k7t5 created
+service/adservice created
+service/cartservice created
+service/checkoutservice created
+service/currencyservice created
+service/emailservice created
+service/frontend created
+service/frontend-external created
+service/paymentservice created
+service/productcatalogservice created
+service/recommendationservice created
+service/redis-cart created
+service/shippingservice created
+deployment.apps/adservice created
+deployment.apps/cartservice created
+deployment.apps/checkoutservice created
+deployment.apps/currencyservice created
+deployment.apps/emailservice created
+deployment.apps/frontend created
+deployment.apps/paymentservice created
+deployment.apps/productcatalogservice created
+deployment.apps/recommendationservice created
+deployment.apps/redis-cart created
+deployment.apps/shippingservice created
+
+make wait-ready 
+kubectl --context kind-l2-challenge wait --for=condition=available deployment --all -n challenge-l2 --timeout=300s
+deployment.apps/adservice condition met
+deployment.apps/cartservice condition met
+deployment.apps/checkoutservice condition met
+deployment.apps/currencyservice condition met
+deployment.apps/emailservice condition met
+deployment.apps/frontend condition met
+deployment.apps/paymentservice condition met
+deployment.apps/productcatalogservice condition met
+deployment.apps/recommendationservice condition met
+deployment.apps/redis-cart condition met
+deployment.apps/shippingservice condition met
+
+make smoke-test 
+curl -fsS http://localhost:30000/ | grep "Hot Products" > /dev/null && echo "Smoke test superato" || { echo "Smoke test fallito"; exit 1; }
+Smoke test superato
+
+make verify
+kubectl --context kind-l2-challenge get deployments,pods -n challenge-l2
+NAME                                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/adservice               1/1     1            1           2m7s
+deployment.apps/cartservice             1/1     1            1           2m7s
+deployment.apps/checkoutservice         1/1     1            1           2m7s
+deployment.apps/currencyservice         1/1     1            1           2m7s
+deployment.apps/emailservice            1/1     1            1           2m7s
+deployment.apps/frontend                1/1     1            1           2m7s
+deployment.apps/paymentservice          1/1     1            1           2m7s
+deployment.apps/productcatalogservice   1/1     1            1           2m7s
+deployment.apps/recommendationservice   1/1     1            1           2m7s
+deployment.apps/redis-cart              1/1     1            1           2m7s
+deployment.apps/shippingservice         1/1     1            1           2m7s
+
+NAME                                         READY   STATUS    RESTARTS   AGE
+pod/adservice-9745b7dfb-dvpz9                1/1     Running   0          2m7s
+pod/cartservice-6dd594447-rxctj              1/1     Running   0          2m7s
+pod/checkoutservice-775f8bf878-66667         1/1     Running   0          2m7s
+pod/currencyservice-5dc84bf7d-h4zsd          1/1     Running   0          2m7s
+pod/emailservice-87865b54d-pmwcg             1/1     Running   0          2m7s
+pod/frontend-5d5bb549b-tch99                 1/1     Running   0          2m7s
+pod/paymentservice-d45f6dcf6-98gh4           1/1     Running   0          2m7s
+pod/productcatalogservice-68847998d4-4hc52   1/1     Running   0          2m7s
+pod/recommendationservice-5b4d9cd76-wpvbs    1/1     Running   0          2m7s
+pod/redis-cart-558f8d8d44-4hslw              1/1     Running   0          2m7s
+pod/shippingservice-6545f454d4-xqlpl         1/1     Running   0          2m6s
+kubectl --context kind-l2-challenge get svc,endpointslices -n challenge-l2
+NAME                            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+service/adservice               ClusterIP   10.96.79.186    <none>        9555/TCP       2m7s
+service/cartservice             ClusterIP   10.96.143.230   <none>        7070/TCP       2m7s
+service/checkoutservice         ClusterIP   10.96.196.158   <none>        5050/TCP       2m7s
+service/currencyservice         ClusterIP   10.96.81.50     <none>        7000/TCP       2m7s
+service/emailservice            ClusterIP   10.96.131.152   <none>        5000/TCP       2m7s
+service/frontend                ClusterIP   10.96.71.104    <none>        80/TCP         2m7s
+service/frontend-external       NodePort    10.96.202.209   <none>        80:30000/TCP   2m7s
+service/paymentservice          ClusterIP   10.96.77.73     <none>        50051/TCP      2m7s
+service/productcatalogservice   ClusterIP   10.96.84.240    <none>        3550/TCP       2m7s
+service/recommendationservice   ClusterIP   10.96.165.220   <none>        8080/TCP       2m7s
+service/redis-cart              ClusterIP   10.96.103.202   <none>        6379/TCP       2m7s
+service/shippingservice         ClusterIP   10.96.225.87    <none>        50051/TCP      2m7s
+
+NAME                                                         ADDRESSTYPE   PORTS   ENDPOINTS     AGE
+endpointslice.discovery.k8s.io/adservice-82gml               IPv4          9555    10.244.0.5    2m7s
+endpointslice.discovery.k8s.io/cartservice-l6bkr             IPv4          7070    10.244.0.10   2m7s
+endpointslice.discovery.k8s.io/checkoutservice-r7rbx         IPv4          5050    10.244.0.6    2m7s
+endpointslice.discovery.k8s.io/currencyservice-tqd98         IPv4          7000    10.244.0.7    2m7s
+endpointslice.discovery.k8s.io/emailservice-kncpx            IPv4          8080    10.244.0.12   2m7s
+endpointslice.discovery.k8s.io/frontend-external-4x4pp       IPv4          8080    10.244.0.8    2m7s
+endpointslice.discovery.k8s.io/frontend-kxgjx                IPv4          8080    10.244.0.8    2m7s
+endpointslice.discovery.k8s.io/paymentservice-hkqbm          IPv4          50051   10.244.0.9    2m7s
+endpointslice.discovery.k8s.io/productcatalogservice-hw7lj   IPv4          3550    10.244.0.11   2m7s
+endpointslice.discovery.k8s.io/recommendationservice-8f8b7   IPv4          8080    10.244.0.13   2m7s
+endpointslice.discovery.k8s.io/redis-cart-l2hnn              IPv4          6379    10.244.0.14   2m7s
+endpointslice.discovery.k8s.io/shippingservice-sdpx8         IPv4          50051   10.244.0.15   2m7s
+
+INCIDENT 1:
+make trigger-incident-1
+kubectl --context kind-l2-challenge apply -k k8s/overlays/incident-1
+namespace/challenge-l2 unchanged
+serviceaccount/adservice unchanged
+serviceaccount/cartservice unchanged
+serviceaccount/checkoutservice unchanged
+serviceaccount/currencyservice unchanged
+serviceaccount/emailservice unchanged
+serviceaccount/frontend unchanged
+serviceaccount/paymentservice unchanged
+serviceaccount/productcatalogservice unchanged
+serviceaccount/recommendationservice unchanged
+serviceaccount/shippingservice unchanged
+configmap/frontend-config-mh6288k7t5 unchanged
+service/adservice unchanged
+service/cartservice unchanged
+service/checkoutservice unchanged
+service/currencyservice unchanged
+service/emailservice unchanged
+service/frontend unchanged
+service/frontend-external unchanged
+service/paymentservice unchanged
+service/productcatalogservice unchanged
+service/recommendationservice unchanged
+service/redis-cart unchanged
+service/shippingservice unchanged
+deployment.apps/adservice unchanged
+deployment.apps/cartservice unchanged
+deployment.apps/checkoutservice unchanged
+deployment.apps/currencyservice unchanged
+deployment.apps/emailservice unchanged
+deployment.apps/frontend configured
+deployment.apps/paymentservice unchanged
+deployment.apps/productcatalogservice unchanged
+deployment.apps/recommendationservice unchanged
+deployment.apps/redis-cart unchanged
+deployment.apps/shippingservice unchanged
+
+make evidence 
+Evidenze salvate in docs/evidence/diagnose-20261031-102032.txt
+
+make recover 
+kubectl --context kind-l2-challenge apply -k k8s/overlays/local
+namespace/challenge-l2 unchanged
+serviceaccount/adservice unchanged
+serviceaccount/cartservice unchanged
+serviceaccount/checkoutservice unchanged
+serviceaccount/currencyservice unchanged
+serviceaccount/emailservice unchanged
+serviceaccount/frontend unchanged
+serviceaccount/paymentservice unchanged
+serviceaccount/productcatalogservice unchanged
+serviceaccount/recommendationservice unchanged
+serviceaccount/shippingservice unchanged
+configmap/frontend-config-mh6288k7t5 unchanged
+service/adservice unchanged
+service/cartservice unchanged
+service/checkoutservice unchanged
+service/currencyservice unchanged
+service/emailservice unchanged
+service/frontend unchanged
+service/frontend-external unchanged
+service/paymentservice unchanged
+service/productcatalogservice unchanged
+service/recommendationservice unchanged
+service/redis-cart unchanged
+service/shippingservice unchanged
+deployment.apps/adservice unchanged
+deployment.apps/cartservice unchanged
+deployment.apps/checkoutservice unchanged
+deployment.apps/currencyservice unchanged
+deployment.apps/emailservice unchanged
+deployment.apps/frontend configured
+deployment.apps/paymentservice unchanged
+deployment.apps/productcatalogservice unchanged
+deployment.apps/recommendationservice unchanged
+deployment.apps/redis-cart unchanged
+deployment.apps/shippingservice unchanged
+kubectl --context kind-l2-challenge rollout status deployment/frontend -n challenge-l2 --timeout=300s
+deployment "frontend" successfully rolled out
+kubectl --context kind-l2-challenge wait --for=condition=available deployment --all -n challenge-l2 --timeout=300s
+deployment.apps/adservice condition met
+deployment.apps/cartservice condition met
+deployment.apps/checkoutservice condition met
+deployment.apps/currencyservice condition met
+deployment.apps/emailservice condition met
+deployment.apps/frontend condition met
+deployment.apps/paymentservice condition met
+deployment.apps/productcatalogservice condition met
+deployment.apps/recommendationservice condition met
+deployment.apps/redis-cart condition met
+deployment.apps/shippingservice condition met
+
+make wait-ready 
+kubectl --context kind-l2-challenge wait --for=condition=available deployment --all -n challenge-l2 --timeout=300s
+deployment.apps/adservice condition met
+deployment.apps/cartservice condition met
+deployment.apps/checkoutservice condition met
+deployment.apps/currencyservice condition met
+deployment.apps/emailservice condition met
+deployment.apps/frontend condition met
+deployment.apps/paymentservice condition met
+deployment.apps/productcatalogservice condition met
+deployment.apps/recommendationservice condition met
+deployment.apps/redis-cart condition met
+deployment.apps/shippingservice condition met
+
+INCIDENT 2:
+make trigger-incident-2
+kubectl --context kind-l2-challenge apply -k k8s/overlays/incident-2
+namespace/challenge-l2 unchanged
+serviceaccount/adservice unchanged
+serviceaccount/cartservice unchanged
+serviceaccount/checkoutservice unchanged
+serviceaccount/currencyservice unchanged
+serviceaccount/emailservice unchanged
+serviceaccount/frontend unchanged
+serviceaccount/paymentservice unchanged
+serviceaccount/productcatalogservice unchanged
+serviceaccount/recommendationservice unchanged
+serviceaccount/shippingservice unchanged
+configmap/frontend-config-mh6288k7t5 unchanged
+service/adservice unchanged
+service/cartservice unchanged
+service/checkoutservice unchanged
+service/currencyservice unchanged
+service/emailservice unchanged
+service/frontend unchanged
+service/frontend-external unchanged
+service/paymentservice unchanged
+service/productcatalogservice configured
+service/recommendationservice unchanged
+service/redis-cart unchanged
+service/shippingservice unchanged
+deployment.apps/adservice unchanged
+deployment.apps/cartservice unchanged
+deployment.apps/checkoutservice unchanged
+deployment.apps/currencyservice unchanged
+deployment.apps/emailservice unchanged
+deployment.apps/frontend unchanged
+deployment.apps/paymentservice unchanged
+deployment.apps/productcatalogservice unchanged
+deployment.apps/recommendationservice unchanged
+deployment.apps/redis-cart unchanged
+deployment.apps/shippingservice unchanged
+
+make evidence 
+Evidenze salvate in docs/evidence/diagnose-20261031-102948.txt
+
+make recover 
+kubectl --context kind-l2-challenge apply -k k8s/overlays/local
+namespace/challenge-l2 unchanged
+serviceaccount/adservice unchanged
+serviceaccount/cartservice unchanged
+serviceaccount/checkoutservice unchanged
+serviceaccount/currencyservice unchanged
+serviceaccount/emailservice unchanged
+serviceaccount/frontend unchanged
+serviceaccount/paymentservice unchanged
+serviceaccount/productcatalogservice unchanged
+serviceaccount/recommendationservice unchanged
+serviceaccount/shippingservice unchanged
+configmap/frontend-config-mh6288k7t5 unchanged
+service/adservice unchanged
+service/cartservice unchanged
+service/checkoutservice unchanged
+service/currencyservice unchanged
+service/emailservice unchanged
+service/frontend unchanged
+service/frontend-external unchanged
+service/paymentservice unchanged
+service/productcatalogservice configured
+service/recommendationservice unchanged
+service/redis-cart unchanged
+service/shippingservice unchanged
+deployment.apps/adservice unchanged
+deployment.apps/cartservice unchanged
+deployment.apps/checkoutservice unchanged
+deployment.apps/currencyservice unchanged
+deployment.apps/emailservice unchanged
+deployment.apps/frontend unchanged
+deployment.apps/paymentservice unchanged
+deployment.apps/productcatalogservice unchanged
+deployment.apps/recommendationservice unchanged
+deployment.apps/redis-cart unchanged
+deployment.apps/shippingservice unchanged
+kubectl --context kind-l2-challenge rollout status deployment/frontend -n challenge-l2 --timeout=300s
+deployment "frontend" successfully rolled out
+kubectl --context kind-l2-challenge wait --for=condition=available deployment --all -n challenge-l2 --timeout=300s
+deployment.apps/adservice condition met
+deployment.apps/cartservice condition met
+deployment.apps/checkoutservice condition met
+deployment.apps/currencyservice condition met
+deployment.apps/emailservice condition met
+deployment.apps/frontend condition met
+deployment.apps/paymentservice condition met
+deployment.apps/productcatalogservice condition met
+deployment.apps/recommendationservice condition met
+deployment.apps/redis-cart condition met
+deployment.apps/shippingservice condition met
+
+make wait-ready 
+kubectl --context kind-l2-challenge wait --for=condition=available deployment --all -n challenge-l2 --timeout=300s
+deployment.apps/adservice condition met
+deployment.apps/cartservice condition met
+deployment.apps/checkoutservice condition met
+deployment.apps/currencyservice condition met
+deployment.apps/emailservice condition met
+deployment.apps/frontend condition met
+deployment.apps/paymentservice condition met
+deployment.apps/productcatalogservice condition met
+deployment.apps/recommendationservice condition met
+deployment.apps/redis-cart condition met
+deployment.apps/shippingservice condition met
+
+RICONFIGURAZIONE DICHIARATIVA:
+make demo-reconfig 
+kubectl --context kind-l2-challenge apply -k k8s/overlays/demo-reconfig
+namespace/challenge-l2 unchanged
+serviceaccount/adservice unchanged
+serviceaccount/cartservice unchanged
+serviceaccount/checkoutservice unchanged
+serviceaccount/currencyservice unchanged
+serviceaccount/emailservice unchanged
+serviceaccount/frontend unchanged
+serviceaccount/paymentservice unchanged
+serviceaccount/productcatalogservice unchanged
+serviceaccount/recommendationservice unchanged
+serviceaccount/shippingservice unchanged
+configmap/frontend-config-kfhkttk9cd created
+service/adservice unchanged
+service/cartservice unchanged
+service/checkoutservice unchanged
+service/currencyservice unchanged
+service/emailservice unchanged
+service/frontend unchanged
+service/frontend-external unchanged
+service/paymentservice unchanged
+service/productcatalogservice unchanged
+service/recommendationservice unchanged
+service/redis-cart unchanged
+service/shippingservice unchanged
+deployment.apps/adservice unchanged
+deployment.apps/cartservice unchanged
+deployment.apps/checkoutservice unchanged
+deployment.apps/currencyservice unchanged
+deployment.apps/emailservice unchanged
+deployment.apps/frontend configured
+deployment.apps/paymentservice unchanged
+deployment.apps/productcatalogservice unchanged
+deployment.apps/recommendationservice unchanged
+deployment.apps/redis-cart unchanged
+deployment.apps/shippingservice unchanged
+kubectl --context kind-l2-challenge rollout status deployment/frontend -n challenge-l2 --timeout=300s
+Waiting for deployment "frontend" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "frontend" rollout to finish: 1 old replicas are pending termination...
+deployment "frontend" successfully rolled out
+
+RICONFIGURAZIONE IMPERATIVA:
+make demo-scale
+kubectl --context kind-l2-challenge scale deployment frontend --replicas=2 -n challenge-l2
+deployment.apps/frontend scaled
+kubectl --context kind-l2-challenge get pods -l app=frontend -n challenge-l2
+NAME                       READY   STATUS              RESTARTS   AGE
+frontend-5d5bb549b-qdkmg   1/1     Running             0          6m13s
+frontend-5d5bb549b-r7jwd   0/1     ContainerCreating   0          0s
+
+make demo-scale-undo 
+kubectl --context kind-l2-challenge scale deployment frontend --replicas=1 -n challenge-l2
+deployment.apps/frontend scaled
+kubectl --context kind-l2-challenge get pods -l app=frontend -n challenge-l2
+NAME                       READY   STATUS        RESTARTS   AGE
+frontend-5d5bb549b-qdkmg   1/1     Running       0          7m31s
+frontend-5d5bb549b-r7jwd   1/1     Terminating   0          78s
+
+UNDEPLOY:
+make undeploy 
+kubectl --context kind-l2-challenge delete -k k8s/overlays/local --ignore-not-found
+namespace "challenge-l2" deleted
+serviceaccount "adservice" deleted from challenge-l2 namespace
+serviceaccount "cartservice" deleted from challenge-l2 namespace
+serviceaccount "checkoutservice" deleted from challenge-l2 namespace
+serviceaccount "currencyservice" deleted from challenge-l2 namespace
+serviceaccount "emailservice" deleted from challenge-l2 namespace
+serviceaccount "frontend" deleted from challenge-l2 namespace
+serviceaccount "paymentservice" deleted from challenge-l2 namespace
+serviceaccount "productcatalogservice" deleted from challenge-l2 namespace
+serviceaccount "recommendationservice" deleted from challenge-l2 namespace
+serviceaccount "shippingservice" deleted from challenge-l2 namespace
+configmap "frontend-config-mh6288k7t5" deleted from challenge-l2 namespace
+service "adservice" deleted from challenge-l2 namespace
+service "cartservice" deleted from challenge-l2 namespace
+service "checkoutservice" deleted from challenge-l2 namespace
+service "currencyservice" deleted from challenge-l2 namespace
+service "emailservice" deleted from challenge-l2 namespace
+service "frontend" deleted from challenge-l2 namespace
+service "frontend-external" deleted from challenge-l2 namespace
+service "paymentservice" deleted from challenge-l2 namespace
+service "productcatalogservice" deleted from challenge-l2 namespace
+service "recommendationservice" deleted from challenge-l2 namespace
+service "redis-cart" deleted from challenge-l2 namespace
+service "shippingservice" deleted from challenge-l2 namespace
+deployment.apps "adservice" deleted from challenge-l2 namespace
+deployment.apps "cartservice" deleted from challenge-l2 namespace
+deployment.apps "checkoutservice" deleted from challenge-l2 namespace
+deployment.apps "currencyservice" deleted from challenge-l2 namespace
+deployment.apps "emailservice" deleted from challenge-l2 namespace
+deployment.apps "frontend" deleted from challenge-l2 namespace
+deployment.apps "paymentservice" deleted from challenge-l2 namespace
+deployment.apps "productcatalogservice" deleted from challenge-l2 namespace
+deployment.apps "recommendationservice" deleted from challenge-l2 namespace
+deployment.apps "redis-cart" deleted from challenge-l2 namespace
+deployment.apps "shippingservice" deleted from challenge-l2 namespace
+
+SPEGNIMENTO: 
+make cluster-down 
+kind delete cluster --name l2-challenge
+Deleting cluster "l2-challenge" ...
+Deleted nodes: ["l2-challenge-control-plane"]
